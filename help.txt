@@ -1,0 +1,47 @@
+import logging
+
+from connections.database_conections.insert_database import insert_data
+from connections.database_conections.query_database import get_data
+from connections.redis_cache import redis_pool
+from logging_config import Logger
+
+logger = Logger(level=logging.DEBUG)
+
+
+def main():
+    try:
+        logger.info("Fetching data from database...")
+        data = get_data("SELECT COUNT(*) as count FROM user_details;")
+        print(data)
+        # data = {
+        #     'username': 'new_user',
+        #     'password_hash': 'hashed_password',
+        #     'email': 'new_user@example.com',
+        #     'first_name': 'New',
+        #     'last_name': 'User',
+        #     'date_of_birth': '1990-01-01',
+        #     'gender': 'Other',
+        #     'phone_number': '+1234567890',
+        #     'address': '123 New Address',
+        #     'city': 'New City',
+        #     'state': 'NC',
+        #     'postal_code': '12345',
+        #     'country': 'Country',
+        #     'profile_picture_url': 'http://example.com/images/new_user.jpg'
+        # }
+        # success = insert_data('user_details', data)
+        # print(success)
+        r = redis_pool.get_client()
+        # Set and get a key-value pair
+        r.set('my_key', 'my_value', ex=60)
+        value = r.get('my_key')
+        print(f"Value of 'my_key': {value.decode('utf-8') if value else 'None'}")
+
+        # Delete the key
+        r.delete('my_key')
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
+
+
+if __name__ == "__main__":
+    main()
